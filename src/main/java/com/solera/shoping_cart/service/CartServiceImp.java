@@ -46,5 +46,4 @@ public class CartServiceImp implements ICart {
     public List<Cart> findAll() {
         return (List<Cart>) cartRepository.findAll();
     }
-
 }

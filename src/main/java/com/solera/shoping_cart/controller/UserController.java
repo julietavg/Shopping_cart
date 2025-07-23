@@ -35,28 +35,36 @@ public class UserController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+        List<User> users = userService.findAll();
+        if(users.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("No users were found in the data base");
+        }else{
+            return ResponseEntity.ok(users);
+        }
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         User user = userService.findById(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
-            return ResponseEntity.notFound().build();
+            String message = "User with id " + id + " not found";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.findAll());
-    }
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteById(id);
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("User with id "+ id + " was successfully deleted.");
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("User with id " + id + " was not found and could not be deleted.");
         }
     }
 }

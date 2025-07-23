@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.solera.shoping_cart.contracts.IProduct;
 import com.solera.shoping_cart.model.Product;
+import com.solera.shoping_cart.model.User;
 
+//FALTA EL MÉTODO UPDATE
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -24,53 +26,46 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping
-    public ResponseEntity<String> saveProduct(@RequestBody Product product) {
+   @PostMapping
+    public ResponseEntity<String> saveUser(@RequestBody Product product) {
         boolean saved = productService.save(product);
-
         if (saved) {
-            List<Product> allProducts = productService.findAll();
-
-            int totalCount = allProducts.size();
-            double totalPrice = 0;
-
-            // Calculate the total price of all products
-            for (Product p : allProducts) {
-                totalPrice += p.getPrice();
-            }
-
-            // Create the response message
-            String message = "Were inserted " + totalCount + " product and the total price is " + totalPrice;
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(message);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Product saved successfully.");
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Could not save the product.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Product could not be saved.");
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<?> getAllProducts() {
+        List<Product> products = productService.findAll();
+        if (products.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No products were found in the database.");
+        } else {
+            return ResponseEntity.ok(products);
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
         Product product = productService.findById(id);
         if (product != null) {
             return ResponseEntity.ok(product);
         } else {
-            return ResponseEntity.notFound().build();
+            String message = "Product with id " + id + " not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
+    public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
         boolean deleted = productService.deleteById(id);
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Product with id " + id + " was successfully deleted.");
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Product with id " + id + " was not found and could not be deleted.");
         }
     }
 }
