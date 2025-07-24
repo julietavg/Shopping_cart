@@ -1,7 +1,7 @@
 package com.solera.shoping_cart.service;
 
 import java.util.List;
-
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.solera.shoping_cart.contracts.IProduct;
@@ -19,7 +19,7 @@ public class ProductServiceImp implements IProduct {
 
     @Override
     public Boolean save(Product product) {
-        if (productRepository.save(product).getProduct_id() != null) {
+        if (productRepository.save(product).getProductId() != null) {
             return true;
         }
         return false;
@@ -45,6 +45,24 @@ public class ProductServiceImp implements IProduct {
     @Override
     public List<Product> findAll() {
         return (List<Product>) productRepository.findAll();
+    }
+
+    @Override
+    public boolean update(Long id, Product updateProduct) {
+        Optional<Product> optionalProduct = productRepository.findById(id);
+
+        if (optionalProduct.isPresent()) {
+            Product existingProduct = optionalProduct.get();
+
+            existingProduct.setName(updateProduct.getName());
+            existingProduct.setDescription(updateProduct.getDescription());
+            existingProduct.setPrice(updateProduct.getPrice());
+
+            productRepository.save(existingProduct);
+            return true;
+        }
+        return false;
+
     }
 
 }

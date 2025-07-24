@@ -9,4 +9,5 @@ public interface IProduct {
     Boolean deleteById(Long id);
     Product findById(Long id);
     List<Product> findAll();
+    boolean update(Long id, Product updateProduct);
 }

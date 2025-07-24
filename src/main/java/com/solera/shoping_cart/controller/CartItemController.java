@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,9 +55,22 @@ public class CartItemController {
         // Crear el CartItem con el mapper
         CartItem item = CartItemMapper.fromDTO(dto, cart, product);
 
-        cartItemService.save(item);
+        boolean saved = cartItemService.save(item);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Cart item saved correctly.");
+        if (saved) {
+            List<CartItem> items = cart.getItems();
+            int totalQuantity = items.stream().mapToInt(CartItem::getQuantity).sum();
+            double totalPrice = items.stream()
+                    .mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice())
+                    .sum();
+
+            String result = "Inserted " + totalQuantity + " items. Total price: $" + totalPrice;
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Cart item could not be saved.");
+        }
+
     }
 
     @GetMapping
@@ -91,4 +105,42 @@ public class CartItemController {
                     .body("Cart item with id " + id + " was not found and could not be deleted.");
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateCartItem(@PathVariable Long id, @RequestBody CartItemRequestDTO dto) {
+        // Buscar carrito
+        Cart cart = cartRepository.findById(dto.getCartId()).orElse(null);
+        if (cart == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found.");
+        }
+
+        // Buscar producto
+        Product product = productRepository.findById(dto.getProductId()).orElse(null);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+        }
+
+        // Mapear el nuevo CartItem desde el DTO
+        CartItem updatedItem = CartItemMapper.fromDTO(dto, cart, product);
+
+        boolean updated = cartItemService.update(id, updatedItem);
+
+        if (updated) {
+            return ResponseEntity.ok("Cart item updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart item not found.");
+        }
+    }
+
+    @DeleteMapping("/cart/{cartId}/items")
+    public ResponseEntity<String> deleteAllItemsByCart(@PathVariable Long cart_id) {
+        boolean deleted = cartItemService.deleteAllByCartId(cart_id);
+        if (deleted) {
+            return ResponseEntity.ok("All items from cart " + cart_id + " were successfully deleted.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No items found for cart " + cart_id + ".");
+        }
+    }
+
 }

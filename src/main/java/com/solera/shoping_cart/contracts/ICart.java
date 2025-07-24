@@ -9,4 +9,6 @@ public interface ICart {
     Boolean deleteById(Long id);
     Cart findById(Long id);
     List<Cart> findAll();
+    boolean update(Long id, Cart cart);
+    
 }

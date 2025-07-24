@@ -10,5 +10,5 @@ import com.solera.shoping_cart.model.Cart;
 
 @Repository
 public interface CartRepository extends CrudRepository<Cart, Long> {
-    
+  
 }

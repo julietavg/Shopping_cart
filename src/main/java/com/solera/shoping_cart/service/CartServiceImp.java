@@ -1,6 +1,7 @@
 package com.solera.shoping_cart.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class CartServiceImp implements ICart {
 
     @Override
     public Boolean save(Cart cart) {
-        if (cartRepository.save(cart).getCart_id() != null) {
+        if (cartRepository.save(cart).getCartId() != null) {
             return true;
         }
         return false;
@@ -46,4 +47,24 @@ public class CartServiceImp implements ICart {
     public List<Cart> findAll() {
         return (List<Cart>) cartRepository.findAll();
     }
+
+    @Override
+    public boolean update(Long id, Cart cart) {
+    Optional <Cart> optionalCart = cartRepository.findById(id);
+
+    if(optionalCart.isPresent()){
+        Cart existingCart = optionalCart.get();
+
+        existingCart.setItems(cart.getItems());
+        existingCart.setUser(cart.getUser());
+
+        cartRepository.save(existingCart);
+        return true;
+    }
+
+    return false;
+    }
+
+    
+
 }

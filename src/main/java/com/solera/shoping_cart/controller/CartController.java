@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,4 +69,18 @@ public class CartController {
                     .body("Cart with id " + id + " was not found and could not be deleted.");
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateCart(@PathVariable Long id, @RequestBody Cart cart) {
+        boolean updated = cartService.update(id, cart);
+        if (updated) {
+            return ResponseEntity.ok("Cart with id " + id + " was successfully updated.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cart with id " + id + " was not found and could not be updated.");
+        }
+    }
+
+  
+
 }
