@@ -9,4 +9,5 @@ public interface IUser {
     Boolean deleteById(Long id);
     User findById(Long id);
     List<User> findAll();
+    boolean update(Long id, User user);
 }

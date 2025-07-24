@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.solera.shoping_cart.contracts.IUser;
+import com.solera.shoping_cart.model.Cart;
 import com.solera.shoping_cart.model.User;
 
 @RestController
@@ -27,7 +29,15 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<String> saveUser(@RequestBody User user) {
+        System.out.println("JSON recibido: " + user.getName());
+        if (user.getCart() == null) {
+            Cart cart = new Cart();
+            cart.setUser(user); // vincula el carrito al usuario
+            user.setCart(cart); // vincula el usuario al carrito
+        }
+
         boolean saved = userService.save(user);
+
         if (saved) {
             return ResponseEntity.status(HttpStatus.CREATED).body("User saved successfully.");
         } else {
@@ -38,10 +48,10 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         List<User> users = userService.findAll();
-        if(users.isEmpty()){
+        if (users.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("No users were found in the data base");
-        }else{
+                    .body("No users were found in the data base");
+        } else {
             return ResponseEntity.ok(users);
         }
     }
@@ -61,10 +71,22 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteById(id);
         if (deleted) {
-            return ResponseEntity.ok("User with id "+ id + " was successfully deleted.");
+            return ResponseEntity.ok("User with id " + id + " was successfully deleted.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body("User with id " + id + " was not found and could not be deleted.");
+                    .body("User with id " + id + " was not found and could not be deleted.");
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User user) {
+        boolean updated = userService.update(id, user);
+        if (updated) {
+            return ResponseEntity.ok("User with id " + id + " was successfully updated.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User with id " + id + " was not found and could not be updated.");
+        }
+    }
+
 }

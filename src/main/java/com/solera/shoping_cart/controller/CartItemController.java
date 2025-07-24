@@ -1,6 +1,5 @@
 package com.solera.shoping_cart.controller;
 
-
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -14,33 +13,55 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.solera.shoping_cart.contracts.ICartItem;
+import com.solera.shoping_cart.dto.CartItemRequestDTO;
+import com.solera.shoping_cart.mapper.CartItemMapper;
+import com.solera.shoping_cart.model.Cart;
 import com.solera.shoping_cart.model.CartItem;
-
+import com.solera.shoping_cart.model.Product;
+import com.solera.shoping_cart.repository.CartRepository;
+import com.solera.shoping_cart.repository.ProductRepository;
 
 @RestController
 @RequestMapping("/api/cart-items")
 public class CartItemController {
 
     private final ICartItem cartItemService;
+    private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
 
-    public CartItemController(ICartItem cartItemService) {
+    public CartItemController(ICartItem cartItemService,
+            ProductRepository productRepository,
+            CartRepository cartRepository) {
         this.cartItemService = cartItemService;
+        this.productRepository = productRepository;
+        this.cartRepository = cartRepository;
     }
 
     @PostMapping
-    public ResponseEntity<String> saveCartItem(@RequestBody CartItem cartItem) {
-        boolean saved = cartItemService.save(cartItem);
-        if (saved) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("CartItem saved successfully.");
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("CartItem could not be saved.");
+    public ResponseEntity<String> saveCartItem(@RequestBody CartItemRequestDTO dto) {
+        // Buscar el carrito
+        Cart cart = cartRepository.findById(dto.getCartId()).orElse(null);
+        if (cart == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found.");
         }
-    }
 
+        // Buscar el producto
+        Product product = productRepository.findById(dto.getProductId()).orElse(null);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+        }
+
+        // Crear el CartItem con el mapper
+        CartItem item = CartItemMapper.fromDTO(dto, cart, product);
+
+        cartItemService.save(item);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Cart item saved correctly.");
+    }
 
     @GetMapping
     public ResponseEntity<?> getAllCartItems() {
-       List<CartItem> cartItems = cartItemService.findAll();
+        List<CartItem> cartItems = cartItemService.findAll();
         if (cartItems.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No cart items were found in the database.");
@@ -48,7 +69,6 @@ public class CartItemController {
             return ResponseEntity.ok(cartItems);
         }
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCartItemById(@PathVariable Long id) {
@@ -60,7 +80,6 @@ public class CartItemController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCartItem(@PathVariable Long id) {

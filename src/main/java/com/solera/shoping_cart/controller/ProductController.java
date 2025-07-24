@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.solera.shoping_cart.contracts.IProduct;
 import com.solera.shoping_cart.model.Product;
-import com.solera.shoping_cart.model.User;
 
 //FALTA EL MÉTODO UPDATE
 @RestController

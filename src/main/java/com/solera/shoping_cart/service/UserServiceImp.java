@@ -1,6 +1,7 @@
 package com.solera.shoping_cart.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -46,5 +47,23 @@ public class UserServiceImp implements IUser {
     public List<User> findAll() {
         return (List<User>) userRepository.findAll();
     }
+
+    @Override
+    public boolean update(Long id, User updatedUser) {
+    Optional<User> optionalUser = userRepository.findById(id);
+    
+    if (optionalUser.isPresent()) {
+        User existingUser = optionalUser.get();
+        
+        existingUser.setName(updatedUser.getName());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPhone(updatedUser.getPhone());
+
+        userRepository.save(existingUser);
+        return true;
+    }
+    
+    return false;
+}
 
 }

@@ -48,4 +48,10 @@ public class CartItemServiceImp implements ICartItem {
         return (List<CartItem>) cartItemRepository.findAll();
     }
 
+    @Override
+    public boolean update(Long id, CartItem updatedCartItem) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    }
+
 }

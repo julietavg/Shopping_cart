@@ -9,4 +9,5 @@ public interface ICartItem {
     Boolean deleteById(Long id);
     CartItem findById(Long id);
     List<CartItem> findAll();
+    boolean update(Long id, CartItem updatedCartItem);
 }
