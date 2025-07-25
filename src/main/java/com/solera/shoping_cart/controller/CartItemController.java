@@ -128,13 +128,13 @@ public class CartItemController {
     }
 
     @DeleteMapping("/cart/{cartId}/items")
-    public ResponseEntity<String> deleteAllItemsByCart(@PathVariable Long cart_id) {
-        boolean deleted = cartItemService.deleteAllByCartId(cart_id);
+    public ResponseEntity<String> deleteAllItemsByCart(@PathVariable Long cartId) {
+        boolean deleted = cartItemService.deleteAllByCartId(cartId);
         if (deleted) {
-            return ResponseEntity.ok("All items from cart " + cart_id + " were successfully deleted.");
+            return ResponseEntity.ok("All items from cart " + cartId + " were successfully deleted.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No items found for cart " + cart_id + ".");
+                    .body("No items found for cart " + cartId + ".");
         }
     }
 
