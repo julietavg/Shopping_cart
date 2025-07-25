@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.solera.shoping_cart.contracts.IProduct;
 import com.solera.shoping_cart.model.Product;
 
-//FALTA EL MÉTODO UPDATE
+import jakarta.validation.Valid;
+
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -26,7 +28,7 @@ public class ProductController {
     }
 
    @PostMapping
-    public ResponseEntity<String> saveProduct(@RequestBody Product product) {
+    public ResponseEntity<String> saveProduct(@Valid @RequestBody Product product) {
         boolean saved = productService.save(product);
         if (saved) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Product saved successfully.");
@@ -70,7 +72,7 @@ public class ProductController {
 
     
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+    public ResponseEntity<String> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
         boolean updated = productService.update(id, product);
         if (updated) {
             return ResponseEntity.ok("Product with id " + id + " was successfully updated.");

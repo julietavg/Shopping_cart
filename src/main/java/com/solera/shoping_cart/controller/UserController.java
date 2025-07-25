@@ -21,6 +21,8 @@ import com.solera.shoping_cart.model.Cart;
 import com.solera.shoping_cart.model.CartItem;
 import com.solera.shoping_cart.model.User;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -32,12 +34,11 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<String> saveUser(@RequestBody User user) {
-        System.out.println("JSON recibido: " + user.getName());
+    public ResponseEntity<String> saveUser(@Valid @RequestBody User user) {
         if (user.getCart() == null) {
             Cart cart = new Cart();
-            cart.setUser(user); // vincula el carrito al usuario
-            user.setCart(cart); // vincula el usuario al carrito
+            cart.setUser(user); 
+            user.setCart(cart); 
         }
 
         boolean saved = userService.save(user);
@@ -149,7 +150,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<String> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
         boolean updated = userService.update(id, user);
         if (updated) {
             return ResponseEntity.ok("User with id " + id + " was successfully updated.");

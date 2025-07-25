@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.solera.shoping_cart.contracts.ICart;
 import com.solera.shoping_cart.model.Cart;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/carts")
 public class CartController {
@@ -29,7 +31,7 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createCart(@RequestBody Cart cart) {
+    public ResponseEntity<String> createCart(@Valid @RequestBody Cart cart) {
         if (cart.getUser() == null) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -127,7 +129,7 @@ public class CartController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCart(@PathVariable Long id, @RequestBody Cart cart) {
+    public ResponseEntity<String> updateCart(@PathVariable Long id, @Valid @RequestBody Cart cart) {
         boolean updated = cartService.update(id, cart);
         if (updated) {
             return ResponseEntity.ok("Cart with id " + id + " was successfully updated.");

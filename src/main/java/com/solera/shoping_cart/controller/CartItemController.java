@@ -22,6 +22,8 @@ import com.solera.shoping_cart.model.Product;
 import com.solera.shoping_cart.repository.CartRepository;
 import com.solera.shoping_cart.repository.ProductRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/cart-items")
 public class CartItemController {
@@ -39,7 +41,7 @@ public class CartItemController {
     }
 
     @PostMapping
-    public ResponseEntity<String> saveCartItem(@RequestBody CartItemRequestDTO dto) {
+    public ResponseEntity<String> saveCartItem(@Valid @RequestBody CartItemRequestDTO dto) {
         // Buscar el carrito
         Cart cart = cartRepository.findById(dto.getCartId()).orElse(null);
         if (cart == null) {
@@ -103,20 +105,17 @@ public class CartItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCartItem(@PathVariable Long id, @RequestBody CartItemRequestDTO dto) {
-        // Buscar carrito
+    public ResponseEntity<String> updateCartItem(@Valid @PathVariable Long id, @RequestBody CartItemRequestDTO dto) {
         Cart cart = cartRepository.findById(dto.getCartId()).orElse(null);
         if (cart == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found.");
         }
 
-        // Buscar producto
         Product product = productRepository.findById(dto.getProductId()).orElse(null);
         if (product == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
         }
 
-        // Mapear el nuevo CartItem desde el DTO
         CartItem updatedItem = CartItemMapper.fromDTO(dto, cart, product);
 
         boolean updated = cartItemService.update(id, updatedItem);
