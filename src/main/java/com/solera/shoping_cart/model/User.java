@@ -16,7 +16,7 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "app_user") // 🔧 Aquí renombramos para evitar conflicto
+@Table(name = "app_user") //
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

@@ -1,6 +1,8 @@
 package com.solera.shoping_cart.controller;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,12 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<String> createCart(@RequestBody Cart cart) {
+        if (cart.getUser() == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Cannot create a cart without assigning it to a user.");
+        }
+
         boolean saved = cartService.save(cart);
         if (saved) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Cart created successfully.");
@@ -40,23 +48,71 @@ public class CartController {
     @GetMapping
     public ResponseEntity<?> getAllCarts() {
         List<Cart> carts = cartService.findAll();
+
         if (carts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No carts were found in the database.");
-        } else {
-            return ResponseEntity.ok(carts);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No carts found.");
         }
+
+        List<Map<String, Object>> cartSummaries = carts.stream().map(cart -> {
+            double[] totalPrice = { 0 }; // arreglo para usar en lambda
+            int[] totalQuantity = { 0 };
+
+            List<Map<String, Object>> items = cart.getItems().stream().map(item -> {
+                double subtotal = item.getQuantity() * item.getProduct().getPrice();
+                totalPrice[0] += subtotal;
+                totalQuantity[0] += item.getQuantity();
+
+                Map<String, Object> itemData = new LinkedHashMap<>();
+                itemData.put("productName", item.getProduct().getName());
+                itemData.put("unitPrice", item.getProduct().getPrice());
+                itemData.put("quantity", item.getQuantity());
+                itemData.put("subtotal", subtotal);
+                return itemData;
+            }).toList();
+
+            Map<String, Object> cartData = new LinkedHashMap<>();
+            cartData.put("cartId", cart.getCartId());
+            cartData.put("items", items);
+            cartData.put("totalQuantity", totalQuantity[0]);
+            cartData.put("totalPrice", totalPrice[0]);
+
+            return cartData;
+        }).toList();
+
+        return ResponseEntity.ok(cartSummaries);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCartById(@PathVariable Long id) {
         Cart cart = cartService.findById(id);
-        if (cart != null) {
-            return ResponseEntity.ok(cart);
-        } else {
-            String message = "Cart with id " + id + " not found.";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+        if (cart == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Cart with id " + id + " not found.");
         }
+
+        double[] totalPrice = { 0 };
+        int[] totalQuantity = { 0 };
+
+        List<Map<String, Object>> items = cart.getItems().stream().map(item -> {
+            double subtotal = item.getQuantity() * item.getProduct().getPrice();
+            totalPrice[0] += subtotal;
+            totalQuantity[0] += item.getQuantity();
+
+            Map<String, Object> itemData = new LinkedHashMap<>();
+            itemData.put("productName", item.getProduct().getName());
+            itemData.put("unitPrice", item.getProduct().getPrice());
+            itemData.put("quantity", item.getQuantity());
+            itemData.put("subtotal", subtotal);
+            return itemData;
+        }).toList();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("cartId", cart.getCartId());
+        result.put("items", items);
+        result.put("totalQuantity", totalQuantity[0]);
+        result.put("totalPrice", totalPrice[0]);
+
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
@@ -80,7 +136,5 @@ public class CartController {
                     .body("Cart with id " + id + " was not found and could not be updated.");
         }
     }
-
-  
 
 }

@@ -1,6 +1,9 @@
 package com.solera.shoping_cart.controller;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.solera.shoping_cart.contracts.IUser;
 import com.solera.shoping_cart.model.Cart;
+import com.solera.shoping_cart.model.CartItem;
 import com.solera.shoping_cart.model.User;
 
 @RestController
@@ -50,21 +54,87 @@ public class UserController {
         List<User> users = userService.findAll();
         if (users.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No users were found in the data base");
-        } else {
-            return ResponseEntity.ok(users);
+                    .body("No users were found in the database");
         }
+
+        List<Map<String, Object>> userResponses = new ArrayList<>();
+
+        for (User user : users) {
+            Map<String, Object> userMap = new LinkedHashMap<>();
+            userMap.put("userId", user.getUser_id());
+            userMap.put("name", user.getName());
+            userMap.put("email", user.getEmail());
+            userMap.put("phone", user.getPhone());
+
+            Cart cart = user.getCart();
+            if (cart != null && cart.getItems() != null && !cart.getItems().isEmpty()) {
+                List<Map<String, Object>> items = new ArrayList<>();
+                double totalPrice = 0;
+
+                for (CartItem item : cart.getItems()) {
+                    double itemTotal = item.getQuantity() * item.getProduct().getPrice();
+                    totalPrice += itemTotal;
+
+                    Map<String, Object> itemMap = new LinkedHashMap<>();
+                    itemMap.put("product", item.getProduct().getName());
+                    itemMap.put("quantity", item.getQuantity());
+                    itemMap.put("price", item.getProduct().getPrice());
+                    itemMap.put("subtotal", itemTotal);
+                    items.add(itemMap);
+                }
+
+                userMap.put("cartItems", items);
+                userMap.put("cartTotal", totalPrice);
+            } else {
+                userMap.put("cartItems", "No items in cart");
+                userMap.put("cartTotal", 0);
+            }
+
+            userResponses.add(userMap);
+        }
+
+        return ResponseEntity.ok(userResponses);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         User user = userService.findById(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
+        if (user == null) {
             String message = "User with id " + id + " not found";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
         }
+
+        Map<String, Object> userMap = new LinkedHashMap<>();
+        userMap.put("userId", user.getUser_id());
+        userMap.put("name", user.getName());
+        userMap.put("email", user.getEmail());
+        userMap.put("phone", user.getPhone());
+
+        Cart cart = user.getCart();
+        if (cart != null && cart.getItems() != null && !cart.getItems().isEmpty()) {
+            List<Map<String, Object>> items = new ArrayList<>();
+            double totalPrice = 0;
+
+            for (CartItem item : cart.getItems()) {
+                double itemTotal = item.getQuantity() * item.getProduct().getPrice();
+                totalPrice += itemTotal;
+
+                Map<String, Object> itemMap = new LinkedHashMap<>();
+                itemMap.put("product", item.getProduct().getName());
+                itemMap.put("quantity", item.getQuantity());
+                itemMap.put("price", item.getProduct().getPrice());
+                itemMap.put("subtotal", itemTotal);
+                items.add(itemMap);
+            }
+
+            userMap.put("cartItems", items);
+            userMap.put("cartTotal", totalPrice);
+        } else {
+            userMap.put("cartItems", "No items in cart");
+            userMap.put("cartTotal", 0);
+        }
+
+        return ResponseEntity.ok(userMap);
     }
 
     @DeleteMapping("/{id}")

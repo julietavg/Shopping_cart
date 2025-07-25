@@ -58,12 +58,8 @@ public class CartItemController {
         boolean saved = cartItemService.save(item);
 
         if (saved) {
-            List<CartItem> items = cart.getItems();
-            int totalQuantity = items.stream().mapToInt(CartItem::getQuantity).sum();
-            double totalPrice = items.stream()
-                    .mapToDouble(i -> i.getQuantity() * i.getProduct().getPrice())
-                    .sum();
-
+            int totalQuantity = item.getQuantity();
+            double totalPrice = totalQuantity * product.getPrice();
             String result = "Inserted " + totalQuantity + " items. Total price: $" + totalPrice;
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
 
