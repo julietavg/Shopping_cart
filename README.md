@@ -17,7 +17,7 @@ Este proyecto es una API RESTful para gestionar un **carrito de compras**, imple
 ### 1. Clona el repositorio
 
 ```bash
-git clone https://github.com/tuusuario/shopping_cart.git
+git clone https://github.com/julietavg/Shopping_cart.git
 cd shopping_cart
 ```
 
