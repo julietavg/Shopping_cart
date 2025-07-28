@@ -16,4 +16,6 @@ public interface CartItemRepository extends CrudRepository<CartItem, Long> {
 
     void deleteByCart_CartId(Long cartId);
 
+    boolean existsByProductProductId(Long productId);
+
 }

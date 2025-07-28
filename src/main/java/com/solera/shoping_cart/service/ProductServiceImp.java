@@ -6,16 +6,23 @@ import org.springframework.stereotype.Service;
 
 import com.solera.shoping_cart.contracts.IProduct;
 import com.solera.shoping_cart.model.Product;
+import com.solera.shoping_cart.repository.CartItemRepository;
 import com.solera.shoping_cart.repository.ProductRepository;
+
+
 
 @Service
 public class ProductServiceImp implements IProduct {
 
     private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public ProductServiceImp(ProductRepository productRepository) {
+    public ProductServiceImp(ProductRepository productRepository,
+                             CartItemRepository cartItemRepository) {
         this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
     }
+
 
     @Override
     public Boolean save(Product product) {
@@ -25,15 +32,18 @@ public class ProductServiceImp implements IProduct {
         return false;
     }
 
-    @Override
+     @Override
     public Boolean deleteById(Long id) {
+        if (cartItemRepository.existsByProductProductId(id)) {
+            return null;
+        }
+
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
             return true;
         }
         return false;
     }
-
     @Override
     public Product findById(Long id) {
         if (productRepository.existsById(id)) {

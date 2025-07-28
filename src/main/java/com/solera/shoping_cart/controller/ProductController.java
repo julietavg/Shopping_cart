@@ -16,7 +16,6 @@ import com.solera.shoping_cart.model.Product;
 
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -27,7 +26,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-   @PostMapping
+    @PostMapping
     public ResponseEntity<String> saveProduct(@Valid @RequestBody Product product) {
         boolean saved = productService.save(product);
         if (saved) {
@@ -61,16 +60,19 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProductById(@PathVariable Long id) {
-        boolean deleted = productService.deleteById(id);
-        if (deleted) {
+        Boolean deleted = productService.deleteById(id);
+
+        if (Boolean.TRUE.equals(deleted)) {
             return ResponseEntity.ok("Product with id " + id + " was successfully deleted.");
+        } else if (deleted == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Product with id " + id + " cannot be deleted because it is used in one or more cart items.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Product with id " + id + " was not found and could not be deleted.");
         }
     }
 
-    
     @PutMapping("/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
         boolean updated = productService.update(id, product);
